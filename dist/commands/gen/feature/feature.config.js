@@ -27,6 +27,10 @@ exports.featureConfig = {
             fileName: "tags.ts",
             destination: "config",
         },
+        utils: {
+            fileName: "utils.ts",
+            destination: "utils",
+        },
         index: {
             fileName: "index.ts",
             destination: "", // Place in the root of the feature folder
