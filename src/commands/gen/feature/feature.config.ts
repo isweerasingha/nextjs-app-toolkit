@@ -7,27 +7,27 @@ export const featureConfig = {
   // A map of template files to their destination subfolder and filename
   templates: {
     hook: {
-      fileName: "use__pascalCase__List.ts",
+      fileName: "__camelCase__.hooks.ts",
       destination: "hooks",
     },
     service: {
-      fileName: "__camelCase__Service.ts",
+      fileName: "__camelCase__.service.ts",
       destination: "services",
     },
     slice: {
-      fileName: "__camelCase__Slice.ts",
+      fileName: "__camelCase__.slice.ts",
       destination: "state",
     },
     types: {
-      fileName: "__camelCase__Types.ts",
+      fileName: "__camelCase__.types.ts",
       destination: "types",
     },
     config: {
-      fileName: "tags.ts",
+      fileName: "__camelCase__.config.ts",
       destination: "config",
     },
     utils: {
-      fileName: "__camelCase__Utils.ts",
+      fileName: "__camelCase__.utils.ts",
       destination: "utils",
     },
     index: {
