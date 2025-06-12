@@ -1,0 +1,18 @@
+// src/commands/feature/templates/service.ts
+"use server";
+
+import { revalidateTag } from "next/cache";
+import { __pascalCase__ } from "../types/__camelCase__Types";
+import { __upperSnakeCase___TAG } from "../config/tags";
+
+const API_BASE_URL = "http://example.com/api";
+
+export async function get__pascalCase__s(): Promise<__pascalCase__[]> {
+  const res = await fetch(`${API_BASE_URL}/__plural__`, {
+    next: { tags: [__upperSnakeCase___TAG] },
+  });
+  if (!res.ok) throw new Error('Failed to fetch __plural__');
+  return res.json();
+}
+
+// Add other CRUD function templates here...

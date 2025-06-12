@@ -1,0 +1,12 @@
+/**
+ * Barrel file for the __pascalCase__ feature.
+ * This file re-exports all the modules from this feature folder,
+ * allowing for clean imports like:
+ * import { use__pascalCase__List, __pascalCase__ } from 'app/features/__camelCase__';
+ */
+
+export * from "./hooks/use__pascalCase__List";
+export * from "./services/__camelCase__Service";
+export * from "./state/__camelCase__Slice";
+export * from "./types/__camelCase__Types";
+export * from "./config/tags";

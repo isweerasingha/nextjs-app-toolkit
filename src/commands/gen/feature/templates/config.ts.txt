@@ -1,0 +1,7 @@
+/**
+ * Defines constants for the __camelCase__ feature.
+ * Using constants helps avoid typos and makes maintenance easier.
+ */
+
+// Cache tag used for on-demand revalidation in Next.js Server Actions.
+export const __upperSnakeCase___TAG = "__plural__";
