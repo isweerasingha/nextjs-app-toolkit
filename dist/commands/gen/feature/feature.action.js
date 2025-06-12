@@ -51,13 +51,13 @@ function replacePlaceholders(content, variations) {
  * The main action for generating a feature.
  */
 function generateFeatureAction(featureName) {
-    console.log(`🚀 Starting generation for feature: ${featureName}...`);
+    console.log(`Starting generation for feature: ${featureName}...`);
     const variations = (0, formatting_1.generateNameVariations)(featureName);
     // This correctly creates the feature folder inside the project where you run the command.
-    const targetDir = path.join(process.cwd(), 'app', 'features', variations.camelCase);
+    const targetDir = path.join(process.cwd(), "src", "features", variations.camelCase);
     // 1. Create all necessary directories
     fs.mkdirSync(targetDir, { recursive: true });
-    feature_config_1.featureConfig.subfolders.forEach(subfolder => {
+    feature_config_1.featureConfig.subfolders.forEach((subfolder) => {
         if (subfolder) {
             fs.mkdirSync(path.join(targetDir, subfolder), { recursive: true });
         }
@@ -66,18 +66,18 @@ function generateFeatureAction(featureName) {
     Object.entries(feature_config_1.featureConfig.templates).forEach(([templateName, config]) => {
         // --- THIS IS THE UPDATED LINE ---
         // It now reads from the foolproof '.ts.txt' extension.
-        const templatePath = path.join(__dirname, 'templates', `${templateName}.ts.txt`);
+        const templatePath = path.join(__dirname, "templates", `${templateName}.ts.txt`);
         // --- END OF UPDATE ---
         if (!fs.existsSync(templatePath)) {
             console.warn(`[Warning] Template file not found: ${templatePath}`);
             return;
         }
-        const templateContent = fs.readFileSync(templatePath, 'utf-8');
+        const templateContent = fs.readFileSync(templatePath, "utf-8");
         const processedContent = replacePlaceholders(templateContent, variations);
         const finalFileName = replacePlaceholders(config.fileName, variations);
         const destinationPath = path.join(targetDir, config.destination, finalFileName);
         fs.writeFileSync(destinationPath, processedContent);
     });
-    console.log(`✅ Successfully created feature: ${variations.pascalCase}`);
-    console.log(`📍 Path: ${targetDir}`);
+    console.log(`Successfully created feature: ${variations.pascalCase}`);
+    console.log(`Path: ${targetDir}`);
 }
