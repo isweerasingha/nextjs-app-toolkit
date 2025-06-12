@@ -27,7 +27,7 @@ export const featureConfig = {
       destination: "config",
     },
     utils: {
-      fileName: "utils.ts",
+      fileName: "__camelCase__Utils.ts",
       destination: "utils",
     },
     index: {
