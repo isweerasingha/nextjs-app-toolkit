@@ -1,6 +1,6 @@
 {
   "name": "nextjs-app-toolkit",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A CLI toolkit for accelerating Next.js development.",
   "main": "dist/index.js",
   "bin": {
