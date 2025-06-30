@@ -41,7 +41,7 @@ export class NextMiddlewareToolkit {
    * @param token
    * @returns
    */
-  async process() {
+  async init() {
     'use server';
     const retrivedToken = this.token || (await this.getToken(this.request));
     const nextUrl = this.request.nextUrl;

@@ -13,9 +13,9 @@ export default function middleware(request: NextRequest) {
     }
   ];
 
-  const middlewareUtils = new NextMiddlewareToolkit(configMiddlewares, request);
+  const nextMiddlewareToolkit = new NextMiddlewareToolkit(configMiddlewares, request);
 
-  return middlewareUtils.process();
+  return nextMiddlewareToolkit.init();
 }
 
 export const config = {
