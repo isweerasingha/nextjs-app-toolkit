@@ -1,0 +1,47 @@
+import { JWT } from 'next-auth/jwt';
+
+/**
+ * Pathname type for Next.js middleware.
+ * Ex. ['/admin', '/user/*']
+ */
+type Pathname = string;
+
+export type NextMiddlewareToolkitMatcher = Pathname[] | boolean;
+
+export type NextMiddlewareToolkitConfig = {
+  /**
+   * Identifier
+   */
+  identifier: string;
+
+  /**
+   * Matcher for the middleware.
+   * This can be a boolean or an array of pathnames.
+   * Ex. ['/admin', '/user/*'] or boolean
+   */
+  matcher: NextMiddlewareToolkitMatcher;
+
+  /**
+   * Condition callback.
+   * @param token JWT token in Next Auth
+   * @returns boolean
+   */
+  condition: (token: JWT | null) => boolean;
+
+  /**
+   * If Condition false redirect url
+   */
+  failedUrl: string | null;
+
+  /**
+   * Append searchParams as ?callbackUrl=
+   */
+  failedUrlWithCallback?: boolean;
+
+  /**
+   * If Condition true redirect url
+   *  - Optional
+   */
+  sucessUrl?: string;
+  sucessUrlWithToken?: string;
+};

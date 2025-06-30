@@ -1,0 +1,25 @@
+import type { NextRequest } from "next/server";
+import { NextMiddlewareToolkit, NextMiddlewareToolkitConfig } from './utils/NextMiddlewareToolkit';
+
+export default function middleware(request: NextRequest) {
+  const configMiddlewares: NextMiddlewareToolkitConfig[] = [
+    {
+      identifier: 'auth',
+      matcher: ['/auth'],
+      condition: (token) => {
+        return token ? true : false;
+      },
+      failedUrl: '/error',
+    }
+  ];
+
+  const middlewareUtils = new NextMiddlewareToolkit(configMiddlewares, request);
+
+  return middlewareUtils.process();
+}
+
+export const config = {
+  matcher: [
+    '/((?!api|_next/static|_next/image|favicon.ico|images|webviewer|img).*)',
+  ],
+};

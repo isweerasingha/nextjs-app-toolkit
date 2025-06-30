@@ -2,7 +2,7 @@
 import * as fs from "fs";
 import * as path from "path";
 import { generateNameVariations } from "../../../utils/formatting";
-import { featureConfig } from "./feature.config";
+import { featureConfig } from "./config";
 
 /**
  * Replaces placeholders in a string with actual values.

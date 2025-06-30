@@ -1,0 +1,130 @@
+import { getToken, JWT } from 'next-auth/jwt';
+import { NextRequest, NextResponse } from 'next/server';
+import {
+  NextMiddlewareToolkitConfig,
+  NextMiddlewareToolkitMatcher,
+} from './types';
+import { NextURL } from 'next/dist/server/web/next-url';
+
+/**
+ * MiddlewareUtils class to handle middleware configurations and token validation.
+ * It processes the middleware configurations based on the request and token.
+ */
+export class NextMiddlewareToolkit {
+  private config: NextMiddlewareToolkitConfig[];
+  private token?: JWT | null;
+  private request: NextRequest;
+  constructor(
+    /**
+     * MiddlewareUtilConfig array to define the middleware configurations.
+     */
+    config: NextMiddlewareToolkitConfig[],
+    /**
+     * NextRequest object representing the incoming request.
+     */
+    request: NextRequest,
+    /**
+     * JWT token for authentication, optional.
+     */
+    token?: JWT
+  ) {
+    this.config = config;
+    this.request = request;
+    this.token = token;
+  }
+
+  /**
+   * Process MiddlewareUtilConfigs By Matcher Pathname.
+   *  - Redirect to failedUrl if condition false
+   *  - Redirect to sucessUrl if condition true (Optional)
+   * @param request
+   * @param token
+   * @returns
+   */
+  async process() {
+    'use server';
+    const retrivedToken = this.token || (await this.getToken(this.request));
+    const nextUrl = this.request.nextUrl;
+
+    for (const middleware of this.config) {
+      const failedUrl = middleware.failedUrlWithCallback
+        ? this.constructFailedUrl(middleware.failedUrl)
+        : middleware.failedUrl;
+
+      if (this.getConditionsFromMatcher(middleware.matcher, nextUrl)) {
+        if (!middleware.condition(retrivedToken)) {
+          if (failedUrl) {
+            return this.redirectTo(failedUrl, this.request);
+          }
+        } else {
+          if (middleware.sucessUrl) {
+            console.log(middleware.sucessUrl);
+            return this.redirectTo(middleware.sucessUrl, this.request);
+          } else if (middleware.sucessUrlWithToken) {
+            const sessionToken = (
+              retrivedToken?.user as {
+                sessionToken?: string;
+              }
+            )?.sessionToken;
+            if (sessionToken) {
+              return this.redirectTo(
+                `${middleware.sucessUrlWithToken}/${sessionToken}`,
+                this.request
+              );
+            }
+          }
+        }
+      }
+    }
+  }
+
+  private redirectTo(url: string, request: NextRequest) {
+    return NextResponse.redirect(new URL(url, request.url));
+  }
+
+  private async getToken(request: NextRequest) {
+    'use server';
+    const token = await getToken({
+      req: request,
+      secret: process.env.NEXTAUTH_SECRET,
+    });
+    return token;
+  }
+
+  private constructFailedUrl(baseUrl: string | null) {
+    if (baseUrl) {
+      const url = new URL(baseUrl, this.request.url);
+      url.searchParams.append('callbackUrl', this.request.nextUrl.pathname);
+      return url.pathname + url.search;
+    }
+  }
+
+  /**
+   * Get conditions from matcher.
+   * This method checks if the matcher is a boolean or an array of pathnames.
+   * Ex. ['/admin', '/user/*']
+   * @param matcher
+   * @param nextUrl
+   * @returns
+   */
+  private getConditionsFromMatcher(
+    matcher: NextMiddlewareToolkitMatcher,
+    nextUrl: NextURL
+  ): boolean {
+    if (typeof matcher === 'boolean') {
+      return matcher;
+    }
+
+    if (Array.isArray(matcher)) {
+      for (const pattern of matcher) {
+        const regex = new RegExp('^' + pattern.replace('*', '.*') + '$');
+        if (regex.test(nextUrl.pathname)) {
+          return true;
+        }
+      }
+      return false;
+    } else {
+      throw new Error('Invalid matcher type');
+    }
+  }
+}

@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
 import { Command } from "commander";
-import { generateFeatureAction } from "./commands/gen/feature/feature.action";
-
+import { generateFeatureAction } from "./commands/gen/feature/action";
+import { initMiddlewareToolkitAction } from "./commands/init/nextMiddlewareToolkit/action";
 
 // Initialize the main command
 const program = new Command();
@@ -21,6 +21,21 @@ program
   .description("Generate a new feature module.")
   .argument("<name>", 'The name of the feature (e.g., "product", "user")')
   .action(generateFeatureAction);
+
+program
+  .command('init:middleware')
+  .alias('im')
+  .description('Initializes a robust Next.js Middleware setup.')
+  // --- THIS IS THE UPDATED PART ---
+  .option(
+    '-p, --path <string>',
+    "The base directory for generated files (e.g., 'src', 'lib', or '/')",
+    'src'
+  )
+  .action((options) => {
+    // Pass the received options to the action function
+    initMiddlewareToolkitAction(options);
+  });
 
 // Add more commands here in the future...
 // program.command('gen:component')...
