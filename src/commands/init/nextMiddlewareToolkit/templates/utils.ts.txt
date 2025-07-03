@@ -1,0 +1,22 @@
+/**
+ * Checks if the given URL matches any of the patterns in the matchQueryArray.
+ * @param matchQueryArray An array of string patterns to match against.
+ * @param nextUrl The URL object to check for matches.
+ * @returns True if a match is found, otherwise false.
+ */
+export function getRegexMatchURL(
+  matchQueryArray: string[],
+  url: string
+): boolean {
+  if (Array.isArray(matchQueryArray)) {
+    for (const pattern of matchQueryArray) {
+      const regex = new RegExp('^' + pattern.replace('*', '.*') + '$');
+      if (regex.test(url)) {
+        return true;
+      }
+    }
+    return false;
+  } else {
+    throw new Error('Invalid matcher type');
+  }
+}

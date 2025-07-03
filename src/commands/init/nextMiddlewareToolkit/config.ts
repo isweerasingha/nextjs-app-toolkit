@@ -16,6 +16,11 @@ export const middlewareToolkitConfig = {
       outputName: "types.ts",
     },
     {
+      templateName: "utils",
+      destinationPath: "src/utils/NextMiddlewareToolkit",
+      outputName: "utils.ts",
+    },
+    {
       templateName: "index",
       destinationPath: "src/utils/NextMiddlewareToolkit",
       outputName: "index.ts",

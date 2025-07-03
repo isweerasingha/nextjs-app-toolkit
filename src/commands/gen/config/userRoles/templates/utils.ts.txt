@@ -1,0 +1,108 @@
+import { getRegexMatchURL } from '@/utils/NextMiddlewareToolkit/utils';
+import { UserRole, UserRolesPermissionConfig } from './types';
+
+/**
+ * Extracts an array of route paths from the provided route objects.
+ * This function takes multiple route objects, each containing string keys and values,
+ * @param routes - An array of route objects, each containing string keys and values.
+ * Each object represents a set of routes, where the keys are route identifiers and the values are the corresponding route paths.
+ * @returns An array of route paths extracted from the provided route objects.
+ */
+export function getArrayFromRoutes(
+  ...routes: Record<string, string>[]
+): string[] {
+  const result: string[] = [];
+  routes.forEach((route) => {
+    Object.keys(route).forEach((routeKey) => {
+      if (route[routeKey]) {
+        result.push(route[routeKey]);
+      }
+    });
+  });
+  return result;
+}
+
+/**
+ * Checks if a specific role has permission to access a pathname.
+ * @param role The user role to check.
+ * @param pathname The URL path to check against.
+ * @param permissionsConfig The complete user role permissions configuration.
+ * @returns `true` if the role has permission, otherwise `false`.
+ */
+function roleHasPermission(
+  role: UserRole,
+  pathname: string,
+  permissionsConfig: UserRolesPermissionConfig,
+  permissionsPrefix?: string
+): boolean {
+  const rolePermissions = permissionsConfig[role];
+
+  if (!rolePermissions) {
+    return false;
+  }
+
+  const allAllowedPaths = [
+    ...(rolePermissions.canAll || []),
+    ...(rolePermissions.canView || []),
+    ...(rolePermissions.canInsert || []),
+    ...(rolePermissions.canEdit || []),
+    ...(rolePermissions.canDelete || []),
+  ];
+
+  const allowedPathsWithPrefix = permissionsPrefix
+    ? allAllowedPaths.map((path) => {
+        if (permissionsPrefix && !path.startsWith(permissionsPrefix)) {
+          path = `${permissionsPrefix}${path}`;
+        }
+        return path;
+      })
+    : allAllowedPaths;
+
+  return allowedPathsWithPrefix.includes(pathname);
+}
+
+/**
+ * Checks if a user role has permission to access a specific pathname.
+ * @param userRole The user role to check. If not provided, defaults to `UserRole.GUEST`.
+ * @param pathname The URL path to check against.
+ * @param userRolePermissions The complete user role permissions configuration.
+ * @param permissionsPrefix An optional prefix to prepend to the pathname for permission checks.
+ * @param excludePathnames An array of pathnames that should be excluded from permission checks.
+ * @param excludePathnamePrefix An optional prefix to prepend to the excluded pathnames.
+ * @returns `true` if the user role has permission, otherwise `false`.
+ */
+export function checkUserRolePermission({
+  userRole,
+  pathname,
+  userRolePermissions,
+  permissionsPrefix,
+  excludePathnames = [],
+  excludePathnamePrefix,
+}: {
+  userRole?: UserRole;
+  pathname: string;
+  userRolePermissions: UserRolesPermissionConfig;
+  permissionsPrefix?: string;
+  excludePathnames?: string[];
+  excludePathnamePrefix?: string;
+}): boolean {
+  if (excludePathnamePrefix) {
+    excludePathnames = excludePathnames.map((path) => {
+      if (!path.startsWith(excludePathnamePrefix)) {
+        return `${excludePathnamePrefix}${path}`;
+      }
+      return path;
+    });
+  }
+  if (getRegexMatchURL(excludePathnames, pathname)) {
+    return true;
+  }
+
+  const role: UserRole = userRole ? userRole : UserRole.GUEST;
+  return roleHasPermission(
+    role,
+    pathname,
+    userRolePermissions,
+    permissionsPrefix
+  );
+}

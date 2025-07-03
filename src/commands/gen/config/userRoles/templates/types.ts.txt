@@ -1,0 +1,14 @@
+export enum UserRole {
+  ADMIN = "ADMIN",
+  GUEST = "GUEST",
+}
+
+export type UserRolesPermissionConfig = {
+  [key in UserRole]: {
+    canAll: string[];
+    canView: string[];
+    canInsert: string[];
+    canEdit: string[];
+    canDelete: string[];
+  };
+};

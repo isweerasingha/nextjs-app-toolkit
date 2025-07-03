@@ -1,0 +1,19 @@
+import { UserRole, UserRolesPermissionConfig } from "./types";
+import { getArrayFromRoutes } from "./utils";
+
+export const UserRolePermissions: UserRolesPermissionConfig = {
+  [UserRole.GUEST]: {
+    canAll: getArrayFromRoutes(),
+    canView: [],
+    canInsert: [],
+    canEdit: [],
+    canDelete: [],
+  },
+  [UserRole.ADMIN]: {
+    canAll: [],
+    canView: [],
+    canInsert: [],
+    canEdit: [],
+    canDelete: [],
+  },
+};
