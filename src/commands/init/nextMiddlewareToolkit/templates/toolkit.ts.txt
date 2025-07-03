@@ -5,6 +5,7 @@ import {
   NextMiddlewareToolkitMatcher,
 } from './types';
 import { NextURL } from 'next/dist/server/web/next-url';
+import { getRegexMatchURL } from './utils';
 
 /**
  * MiddlewareUtils class to handle middleware configurations and token validation.
@@ -115,16 +116,6 @@ export class NextMiddlewareToolkit {
       return matcher;
     }
 
-    if (Array.isArray(matcher)) {
-      for (const pattern of matcher) {
-        const regex = new RegExp('^' + pattern.replace('*', '.*') + '$');
-        if (regex.test(nextUrl.pathname)) {
-          return true;
-        }
-      }
-      return false;
-    } else {
-      throw new Error('Invalid matcher type');
-    }
+    return getRegexMatchURL(matcher, nextUrl.pathname);
   }
 }
