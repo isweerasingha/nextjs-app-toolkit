@@ -1,32 +1,29 @@
-import { getToken, JWT } from 'next-auth/jwt';
-import { NextRequest, NextResponse } from 'next/server';
+import { getToken, JWT } from "next-auth/jwt";
+import { NextRequest, NextResponse } from "next/server";
 import {
   NextMiddlewareToolkitConfig,
   NextMiddlewareToolkitMatcher,
-} from './types';
-import { NextURL } from 'next/dist/server/web/next-url';
-import { getRegexMatchURL } from './utils';
+} from "./types";
+import { NextURL } from "next/dist/server/web/next-url";
+import { getRegexMatchURL } from "./utils";
+import { url } from "inspector";
 
 /**
- * MiddlewareUtils class to handle middleware configurations and token validation.
- * It processes the middleware configurations based on the request and token.
+ * NextMiddlewareToolkit is a utility class that helps manage middleware configurations
+ * and conditions for Next.js applications. It allows you to define middleware
+ * rules and apply them to incoming requests.
+ * @example
+ * const toolkit = new NextMiddlewareToolkit(configMiddlewares, request);
+ * await toolkit.init();
  */
 export class NextMiddlewareToolkit {
   private config: NextMiddlewareToolkitConfig[];
   private token?: JWT | null;
   private request: NextRequest;
+
   constructor(
-    /**
-     * MiddlewareUtilConfig array to define the middleware configurations.
-     */
     config: NextMiddlewareToolkitConfig[],
-    /**
-     * NextRequest object representing the incoming request.
-     */
     request: NextRequest,
-    /**
-     * JWT token for authentication, optional.
-     */
     token?: JWT
   ) {
     this.config = config;
@@ -35,15 +32,11 @@ export class NextMiddlewareToolkit {
   }
 
   /**
-   * Process MiddlewareUtilConfigs By Matcher Pathname.
-   *  - Redirect to failedUrl if condition false
-   *  - Redirect to sucessUrl if condition true (Optional)
-   * @param request
-   * @param token
-   * @returns
+   * Initialize the middleware toolkit.
+   * @returns A promise that resolves when the middleware toolkit has been initialized.
    */
   async init() {
-    'use server';
+    "use server";
     const retrivedToken = this.token || (await this.getToken(this.request));
     const nextUrl = this.request.nextUrl;
 
@@ -53,23 +46,34 @@ export class NextMiddlewareToolkit {
         : middleware.failedUrl;
 
       if (this.getConditionsFromMatcher(middleware.matcher, nextUrl)) {
-        if (!middleware.condition(retrivedToken)) {
+        if (this.getConditionsFromMatcher(middleware.exclude || [], nextUrl)) {
+          continue;
+        }
+
+        // Pass request into the condition for more context
+        const conditionResult = middleware.condition(retrivedToken);
+
+        if (typeof conditionResult === "string") {
+          return this.redirectTo(conditionResult, this.request);
+        }
+        // If condition returns a function, call it with the redirect URL
+
+        if (!conditionResult) {
           if (failedUrl) {
             return this.redirectTo(failedUrl, this.request);
           }
         } else {
-          if (middleware.sucessUrl) {
-            console.log(middleware.sucessUrl);
-            return this.redirectTo(middleware.sucessUrl, this.request);
-          } else if (middleware.sucessUrlWithToken) {
+          // Condition returned true
+          if (middleware.successUrl) {
+            console.log(middleware.successUrl);
+            return this.redirectTo(middleware.successUrl, this.request);
+          } else if (middleware.successUrlWithToken) {
             const sessionToken = (
-              retrivedToken?.user as {
-                sessionToken?: string;
-              }
+              retrivedToken?.user as { sessionToken?: string }
             )?.sessionToken;
             if (sessionToken) {
               return this.redirectTo(
-                `${middleware.sucessUrlWithToken}/${sessionToken}`,
+                `${middleware.successUrlWithToken}/${sessionToken}`,
                 this.request
               );
             }
@@ -79,12 +83,27 @@ export class NextMiddlewareToolkit {
     }
   }
 
+  /**
+   * Redirects the request to a specified URL.
+   * @param url The URL to redirect to.
+   * @param request The NextRequest object.
+   * @returns A NextResponse object that redirects to the specified URL.
+   * @example
+   * const response = this.redirectTo('/login', request);
+   */
   private redirectTo(url: string, request: NextRequest) {
     return NextResponse.redirect(new URL(url, request.url));
   }
 
+  /**
+   * Retrieves the token from the request.
+   * @param request The NextRequest object.
+   * @returns A promise that resolves to the JWT token or null if not found.
+   * @example
+   * const token = await this.getToken(request);
+   */
   private async getToken(request: NextRequest) {
-    'use server';
+    "use server";
     const token = await getToken({
       req: request,
       secret: process.env.NEXTAUTH_SECRET,
@@ -92,30 +111,37 @@ export class NextMiddlewareToolkit {
     return token;
   }
 
+  /**
+   * Constructs the failed URL with the callback URL.
+   * @param baseUrl The base URL to construct the failed URL from.
+   * @returns The constructed failed URL or undefined.
+   * @example
+   * const failedUrl = this.constructFailedUrl('/login');
+   */
   private constructFailedUrl(baseUrl: string | null) {
     if (baseUrl) {
       const url = new URL(baseUrl, this.request.url);
-      url.searchParams.append('callbackUrl', this.request.nextUrl.pathname);
+      url.searchParams.append("callbackUrl", this.request.nextUrl.pathname);
       return url.pathname + url.search;
     }
+    return undefined;
   }
 
   /**
-   * Get conditions from matcher.
-   * This method checks if the matcher is a boolean or an array of pathnames.
-   * Ex. ['/admin', '/user/*']
-   * @param matcher
-   * @param nextUrl
-   * @returns
+   * Checks if the request conditions match the middleware conditions.
+   * @param matcher The matcher configuration for the middleware.
+   * @param nextUrl The NextURL object for the current request.
+   * @returns True if the conditions match, false otherwise.
+   * @example
+   * const isMatch = this.getConditionsFromMatcher(matcher, nextUrl);
    */
   private getConditionsFromMatcher(
     matcher: NextMiddlewareToolkitMatcher,
     nextUrl: NextURL
   ): boolean {
-    if (typeof matcher === 'boolean') {
+    if (typeof matcher === "boolean") {
       return matcher;
     }
-
     return getRegexMatchURL(matcher, nextUrl.pathname);
   }
 }

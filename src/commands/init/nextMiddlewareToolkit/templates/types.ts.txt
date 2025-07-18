@@ -1,4 +1,4 @@
-import { JWT } from 'next-auth/jwt';
+import { JWT } from "next-auth/jwt";
 
 /**
  * Pathname type for Next.js middleware.
@@ -6,8 +6,33 @@ import { JWT } from 'next-auth/jwt';
  */
 type Pathname = string;
 
+/**
+ * Matcher type for Next.js middleware.
+ * It can be a string or an array of strings.
+ * It can also be a boolean to disable the middleware.
+ * - If true, it will match all paths.
+ * - If false, it will disable the middleware.
+ */
 export type NextMiddlewareToolkitMatcher = Pathname[] | boolean;
 
+
+/**
+ * Configuration for Next.js middleware toolkit.
+ * It defines the conditions and actions for the middleware.
+ * @example
+ * {
+ *   identifier: 'auth',
+ *   matcher: ['/protected/*'],
+ *   condition: (token) => {
+ *     if (token) {
+ *       return true;
+ *     }
+ *     return '/login';
+ *   },
+ *   failedUrl: '/login',
+ *   successUrl: '/dashboard',
+ * }
+ */
 export type NextMiddlewareToolkitConfig = {
   /**
    * Identifier
@@ -16,20 +41,47 @@ export type NextMiddlewareToolkitConfig = {
 
   /**
    * Matcher for the middleware.
-   * This can be a boolean or an array of pathnames.
-   * Ex. ['/admin', '/user/*'] or boolean
+   * It can be a string or an array of strings.
+   * * It can also be a boolean to disable the middleware.
+   * - If true, it will match all paths.
+   * @example ['/admin', '/user/*']
+   * @example true - matches all paths
+   * @example false - disables the middleware
    */
   matcher: NextMiddlewareToolkitMatcher;
 
   /**
-   * Condition callback.
-   * @param token JWT token in Next Auth
-   * @returns boolean
+   * Exclude paths from the matcher.
+   * It can be a string or an array of strings.
+   * @example ['/api/auth/*', '/public/*']
    */
-  condition: (token: JWT | null) => boolean;
+  exclude?: NextMiddlewareToolkitMatcher;
 
   /**
-   * If Condition false redirect url
+   * Condition callback.
+   * @param token JWT token in Next Auth
+   * @returns boolean or string
+   * - If boolean, true means condition passed, false means condition failed.
+   * - If string, it will redirect to the string URL.
+   * @example
+   * (token) => {
+   *   if (token) {
+   *     return true;
+   *   }
+   *   return '/login';
+   * }
+   */
+  condition: (token: JWT | null) => boolean | string;
+
+  /**
+   * Failed URL to redirect to if the condition fails.
+   * - If `failedUrlWithCallback` is true, it will append the searchParams as
+   * `?callbackUrl=`
+   * - If `failedUrlWithCallback` is false, it will redirect to the URL directly
+   * @param failedUrl
+   * @returns string | null
+   * @example
+   * '/login'
    */
   failedUrl: string | null;
 
@@ -39,9 +91,17 @@ export type NextMiddlewareToolkitConfig = {
   failedUrlWithCallback?: boolean;
 
   /**
-   * If Condition true redirect url
-   *  - Optional
+   * Success URL to redirect to if the condition passes.
+   * - If `successUrlWithToken` is true, it will append the session token
+   * to the URL.
+   * - If `successUrl` is provided, it will redirect to the URL directly.
    */
-  sucessUrl?: string;
-  sucessUrlWithToken?: string;
+  successUrl?: string;
+
+  /**
+   * Success URL to redirect to if the condition passes with session token.
+   * - If `successUrlWithToken` is provided, it will append the session token
+   * to the URL.
+   */
+  successUrlWithToken?: string;
 };
