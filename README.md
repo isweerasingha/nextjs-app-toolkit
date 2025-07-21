@@ -19,15 +19,37 @@ Next.js App Toolkit is a command-line interface (CLI) designed to supercharge yo
 
 ## Installation
 
-To use the toolkit, install it globally on your system via NPM.
+1.  **Clone the Repository:**
 
-```bash
-npm install -g nextjs-app-toolkit
-````
+    ```bash
+    git clone https://github.com/isweerasingha/nextjs-app-toolkit.git
+    cd nextjs-app-toolkit
+    ```
 
-*(Note: The package name `nextjs-app-toolkit` is a placeholder until the package is published on NPM.)*
+2.  **Install Dependencies:**
+
+    ```bash
+    npm install
+    ```
+
+3.  **Build the Project:**
+    The build command compiles all TypeScript source files to JavaScript in the `dist/` folder and copies the necessary template files.
+
+    ```bash
+    npm run build
+    ```
+
+4.  **Link for Local Testing:**
+    This command makes your local version of the toolkit available as a global command on your system.
+
+    ```bash
+    npm link
+    ```
+
+    After linking, any changes you make to the source code will be active after you run `npm run build` again.
 
 -----
+
 
 ## Usage
 
@@ -75,35 +97,6 @@ app/features/payment/
 ## For Developers (Contributing)
 
 Contributions are welcome\! If you'd like to help improve the toolkit, please follow these steps to set up a local development environment.
-
-1.  **Clone the Repository:**
-
-    ```bash
-    git clone https://github.com/isweerasingha/nextjs-app-toolkit.git
-    cd nextjs-app-toolkit
-    ```
-
-2.  **Install Dependencies:**
-
-    ```bash
-    npm install
-    ```
-
-3.  **Build the Project:**
-    The build command compiles all TypeScript source files to JavaScript in the `dist/` folder and copies the necessary template files.
-
-    ```bash
-    npm run build
-    ```
-
-4.  **Link for Local Testing:**
-    This command makes your local version of the toolkit available as a global command on your system.
-
-    ```bash
-    npm link
-    ```
-
-    After linking, any changes you make to the source code will be active after you run `npm run build` again.
 
 -----
 
